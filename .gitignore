@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+.vite/
+.build/
+*.tsbuildinfo
+playwright-report/
+test-results/
+debug-*.json
+.netlify/
+*.saga
+*.dize
+*.stitchprogress
+stitchpad-*.zip

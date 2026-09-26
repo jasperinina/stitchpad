@@ -1,0 +1,12 @@
+{
+  "name": "StitchPad — локальный помощник вышивальщицы",
+  "short_name": "StitchPad",
+  "description": "Офлайн-просмотр и отметка схем SAGA/DIZE без сервера.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#e8e4d8",
+  "theme_color": "#26352f",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

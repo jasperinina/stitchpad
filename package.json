@@ -1,0 +1,45 @@
+{
+  "name": "stitchpad-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "inspect:saga": "tsx tools/inspect.ts saga",
+    "inspect:dize": "tsx tools/inspect.ts dize",
+    "compare": "tsx tools/compare.ts",
+    "qa:diagnostics": "tsx tools/qa-diagnostics.ts"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "fast-xml-parser": "latest",
+    "fflate": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@testing-library/react": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "latest",
+    "eslint-plugin-react-refresh": "latest",
+    "fake-indexeddb": "latest",
+    "globals": "latest",
+    "jsdom": "latest",
+    "prettier": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vitest": "latest"
+  }
+}
