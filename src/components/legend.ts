@@ -1,11 +1,12 @@
-import type { PatternDocument, PatternThread, StitchType } from '../model/pattern';
+import type { PatternDocument, PatternThread, StitchKind, StitchType } from '../model/pattern';
 
-export type LegendKind = StitchType | 'backstitch';
+export type LegendKind = StitchKind;
 
 export interface LegendEntry {
   thread: PatternThread;
   total: number;
   completed?: number;
+  strands?: number;
 }
 
 export interface LegendGroup {
@@ -64,6 +65,7 @@ export function buildLegendGroups(
           {
             thread,
             total,
+            strands: strandCount(thread, kind),
             completed:
               kind === 'backstitch' ? undefined : (completedTotals.get(kind)?.get(threadID) ?? 0),
           },
@@ -74,4 +76,11 @@ export function buildLegendGroups(
       ? [{ kind, label, entries, total: entries.reduce((sum, entry) => sum + entry.total, 0) }]
       : [];
   });
+}
+
+function strandCount(thread: PatternThread, kind: LegendKind) {
+  if (kind === 'halfCrossLeft' || kind === 'halfCrossRight') return thread.strands?.halfCross;
+  if (kind === 'threeQuarter') return thread.strands?.quarter;
+  if (kind === 'bead' || kind === 'unknown') return undefined;
+  return thread.strands?.[kind];
 }

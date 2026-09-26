@@ -56,11 +56,13 @@ describe('progress on the real pattern', () => {
     const progress = newProgress(pattern);
     progress.completedStitchIDs = pattern.stitches.slice(500, 600).map((stitch) => stitch.id);
     progress.selectedThreadID = 12;
+    progress.selectedStitchKind = 'knot';
     progress.viewport = { zoom: 17, centerX: 42.5, centerY: 37.25 };
     progress.displaySettings = { ...progress.displaySettings, mode: 'symbols', showGrid: false };
     const restored = decodeProgress(encodeProgress(progress));
     expect(restored.completedStitchIDs).toEqual(progress.completedStitchIDs);
     expect(restored.selectedThreadID).toBe(12);
+    expect(restored.selectedStitchKind).toBe('knot');
     expect(restored.viewport).toEqual(progress.viewport);
     expect(restored.displaySettings).toEqual(progress.displaySettings);
   });

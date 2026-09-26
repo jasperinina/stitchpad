@@ -9,6 +9,7 @@ import {
   type Backstitch,
   type PatternDocument,
   type PatternThread,
+  type StrandCounts,
   type Stitch,
   type StitchType,
 } from '../../model/pattern';
@@ -137,12 +138,27 @@ function parsePalette(root: XMLNode): PatternThread[] {
         number: stringValue(concrete?.ColorId) ?? '',
         name: stringValue(concrete?.Name) ?? '',
         color: rgbFromHex(concrete?.RGB) ?? rgbFromInt(0),
+        strands: parseStrands(color),
         symbol:
           Number.isFinite(code) && code >= 33 && code < 127
             ? String.fromCodePoint(code)
             : symbols[Math.abs(id) % symbols.length],
       };
     });
+}
+
+function parseStrands(color: XMLNode): StrandCounts | undefined {
+  const values: StrandCounts = {
+    fullCross: positiveInt(color.threads_full),
+    halfCross: positiveInt(color.threads_half),
+    quarter: positiveInt(color.threads_quarter),
+    backstitch: positiveInt(color.threads_back),
+    knot: positiveInt(color.threads_french),
+    petite: positiveInt(color.threads_petite),
+    special: positiveInt(color.threads_special),
+    straight: positiveInt(color.threads_straight),
+  };
+  return Object.values(values).some((value) => value !== undefined) ? values : undefined;
 }
 
 function collectBlocks(value: unknown, result: Stitch[]) {
@@ -223,6 +239,10 @@ function arrayValue(value: unknown): unknown[] {
 function toInt(value: unknown, fallback = 0) {
   const parsed = Math.trunc(Number(value));
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+function positiveInt(value: unknown) {
+  const parsed = toInt(value);
+  return parsed > 0 ? parsed : undefined;
 }
 function twice(value: unknown) {
   const parsed = Number(value);

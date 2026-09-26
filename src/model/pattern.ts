@@ -10,6 +10,18 @@ export type StitchType =
   | 'bead'
   | 'special'
   | 'unknown';
+export type StitchKind = StitchType | 'backstitch';
+
+export interface StrandCounts {
+  fullCross?: number;
+  halfCross?: number;
+  quarter?: number;
+  backstitch?: number;
+  knot?: number;
+  petite?: number;
+  special?: number;
+  straight?: number;
+}
 
 export interface RGB {
   red: number;
@@ -23,6 +35,7 @@ export interface PatternThread {
   name: string;
   color: RGB;
   symbol: string;
+  strands?: StrandCounts;
 }
 export interface Stitch {
   id: string;

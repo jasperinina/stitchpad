@@ -1,3 +1,5 @@
+import type { StitchKind, StitchType } from '../model/pattern';
+
 export interface GridCell {
   x: number;
   y: number;
@@ -22,12 +24,17 @@ export function shouldMarkPointer(
   return pointerType !== 'touch' || allowFingerMarking;
 }
 
-export function selectMarkable<T extends { threadID: number }>(
+export function selectMarkable<T extends { threadID: number; type: StitchType }>(
   stitches: T[],
   onlySelectedThread: boolean,
   selectedThread?: number,
+  selectedKind?: StitchKind,
 ): T[] {
   return onlySelectedThread
-    ? stitches.filter((stitch) => stitch.threadID === selectedThread)
+    ? stitches.filter(
+        (stitch) =>
+          stitch.threadID === selectedThread &&
+          (selectedKind === undefined || stitch.type === selectedKind),
+      )
     : stitches;
 }

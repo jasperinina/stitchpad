@@ -421,6 +421,11 @@ select:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.thread-copy .thread-strands {
+  margin-top: 2px;
+  color: var(--accent);
+  font-weight: 700;
+}
 .thread-count {
   font-size: 11px;
   color: #6d736d;

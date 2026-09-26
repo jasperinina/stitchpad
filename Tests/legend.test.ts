@@ -13,6 +13,7 @@ const pattern: PatternDocument = {
       name: 'Black',
       color: { red: 0, green: 0, blue: 0 },
       symbol: '×',
+      strands: { fullCross: 2, halfCross: 2, knot: 1, backstitch: 1 },
     },
   ],
   stitches: [
@@ -38,5 +39,6 @@ describe('pattern legend', () => {
       ['backstitch', 1],
     ]);
     expect(groups.map(({ entries }) => entries[0].completed)).toEqual([1, 0, 1, undefined]);
+    expect(groups.map(({ entries }) => entries[0].strands)).toEqual([2, 2, 1, 1]);
   });
 });

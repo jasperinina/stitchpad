@@ -9,6 +9,7 @@ import {
   type FabricInfo,
   type PatternDocument,
   type PatternThread,
+  type StrandCounts,
   type StitchType,
 } from '../../model/pattern';
 import { PatternParseError } from '../errors';
@@ -111,7 +112,7 @@ function parseMaterials(data: Uint8Array): PatternThread[] {
     const number = r.string16(),
       name = r.string16(),
       brand = r.string16();
-    nested(r, 'STRN');
+    const strands = parseStrands(nested(r, 'STRN'));
     const symbolData = nested(r, 'SYMB');
     nested(r, 'NOTE');
     if (r.u8()) r.skip(4);
@@ -124,6 +125,7 @@ function parseMaterials(data: Uint8Array): PatternThread[] {
       number,
       name,
       color,
+      strands,
       symbol:
         code >= 33 && code < 127
           ? String.fromCodePoint(code)
@@ -131,6 +133,24 @@ function parseMaterials(data: Uint8Array): PatternThread[] {
     });
   }
   return result;
+}
+function parseStrands(data: Uint8Array): StrandCounts | undefined {
+  const names: (keyof StrandCounts)[] = [
+    'fullCross',
+    'halfCross',
+    'quarter',
+    'backstitch',
+    'knot',
+    'petite',
+    'special',
+    'straight',
+  ];
+  const strands: StrandCounts = {};
+  names.forEach((name, index) => {
+    const value = data[index];
+    if (value) strands[name] = value;
+  });
+  return Object.keys(strands).length ? strands : undefined;
 }
 function parseStitches(data: Uint8Array) {
   const r = new BinaryReader(data),

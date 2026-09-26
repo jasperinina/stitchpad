@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PatternDocument } from '../model/pattern';
+import type { PatternDocument, StitchKind } from '../model/pattern';
 import type { DisplaySettings, MarkMode, ViewportState } from '../progress/progress';
 import { interpolatedCells, selectMarkable, shouldMarkPointer } from '../input/marking';
 import { buildRowIndex, stitchesAt } from '../renderer/pattern-index';
@@ -10,6 +10,7 @@ interface Props {
   pattern: PatternDocument;
   completed: Set<string>;
   selectedThread?: number;
+  selectedKind?: StitchKind;
   settings: DisplaySettings;
   interaction: 'view' | 'mark';
   markMode: MarkMode;
@@ -27,6 +28,7 @@ export function PatternCanvas({
   pattern,
   completed,
   selectedThread,
+  selectedKind,
   settings,
   interaction,
   markMode,
@@ -81,11 +83,12 @@ export function PatternCanvas({
           transform,
           completed,
           selectedThread,
+          selectedKind,
           settings,
         });
     });
     return () => cancelAnimationFrame(frame.current);
-  }, [pattern, index, transform, completed, selectedThread, settings, revision]);
+  }, [pattern, index, transform, completed, selectedThread, selectedKind, settings, revision]);
   useEffect(() => {
     const resize = () => setTransform((value) => ({ ...value }));
     window.addEventListener('resize', resize);
@@ -126,6 +129,7 @@ export function PatternCanvas({
         stitchesAt(index, cx, cy),
         settings.onlyMarkSelectedThread,
         selectedThread,
+        selectedKind,
       ))
         stroke.current.add(stitch.id);
     }

@@ -1,4 +1,4 @@
-import type { PatternDocument } from '../model/pattern';
+import type { PatternDocument, StitchKind } from '../model/pattern';
 
 export type DisplayMode = 'symbols' | 'colors' | 'symbolsAndColors' | 'selectedThreadFocus';
 export type CompletedAppearance = 'dim' | 'overlay' | 'hide';
@@ -27,6 +27,7 @@ export interface StitchProgress {
   patternMetadata: { name: string; width: number; height: number };
   completedStitchIDs: string[];
   selectedThreadID?: number;
+  selectedStitchKind?: StitchKind;
   viewport: ViewportState;
   displaySettings: DisplaySettings;
   createdAt: string;
@@ -46,6 +47,8 @@ export const defaultSettings: DisplaySettings = {
 };
 export function newProgress(pattern: PatternDocument): StitchProgress {
   const now = new Date().toISOString();
+  const firstStitch = pattern.stitches[0];
+  const firstBackstitch = pattern.backstitches[0];
   return {
     format: 'StitchPadProgress',
     schemaVersion: 1,
@@ -53,7 +56,8 @@ export function newProgress(pattern: PatternDocument): StitchProgress {
     canonicalPatternHash: pattern.canonicalPatternHash,
     patternMetadata: { name: pattern.metadata.name, ...pattern.dimensions },
     completedStitchIDs: [],
-    selectedThreadID: pattern.palette[0]?.id,
+    selectedThreadID: firstStitch?.threadID ?? firstBackstitch?.threadID ?? pattern.palette[0]?.id,
+    selectedStitchKind: firstStitch?.type ?? (firstBackstitch ? 'backstitch' : undefined),
     viewport: {
       zoom: 1,
       centerX: pattern.dimensions.width / 2,
@@ -93,6 +97,23 @@ export function validateProgress(value: unknown): StitchProgress {
     )
   )
     throw new Error('Повреждены настройки отображения');
+  if (
+    candidate.selectedStitchKind !== undefined &&
+    ![
+      'fullCross',
+      'halfCrossRight',
+      'halfCrossLeft',
+      'quarter',
+      'threeQuarter',
+      'petite',
+      'knot',
+      'bead',
+      'special',
+      'unknown',
+      'backstitch',
+    ].includes(candidate.selectedStitchKind)
+  )
+    throw new Error('Повреждён выбранный тип стежка');
   if (!candidate.createdAt || !candidate.modifiedAt)
     throw new Error('В progress отсутствуют timestamps');
   return candidate as StitchProgress;
@@ -113,8 +134,14 @@ export function progressCompatibility(
 export function sanitizeProgress(progress: StitchProgress, pattern: PatternDocument) {
   const known = new Set(pattern.stitches.map((s) => s.id));
   const ids = [...new Set(progress.completedStitchIDs)].filter((id) => known.has(id));
+  const selectedKind =
+    progress.selectedStitchKind ??
+    pattern.stitches.find((stitch) => stitch.threadID === progress.selectedThreadID)?.type ??
+    (pattern.backstitches.some((stitch) => stitch.threadID === progress.selectedThreadID)
+      ? 'backstitch'
+      : undefined);
   return {
-    progress: { ...progress, completedStitchIDs: ids },
+    progress: { ...progress, completedStitchIDs: ids, selectedStitchKind: selectedKind },
     ignored: progress.completedStitchIDs.length - ids.length,
   };
 }

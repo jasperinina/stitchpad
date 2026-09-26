@@ -19,12 +19,25 @@ describe('real pattern fixtures', () => {
       expect(pattern.stitches.filter((s) => s.type === 'halfCrossRight')).toHaveLength(651);
       expect(pattern.stitches.filter((s) => s.type === 'knot')).toHaveLength(31);
       expect(pattern.backstitches).toHaveLength(639);
+      expect(pattern.palette[0].strands).toEqual({
+        fullCross: 1,
+        halfCross: 1,
+        quarter: 1,
+        backstitch: 1,
+        knot: 1,
+        petite: 1,
+        special: 1,
+        straight: 1,
+      });
     }
     expect(new Set(saga.stitches.map((s) => s.id))).toEqual(
       new Set(dize.stitches.map((s) => s.id)),
     );
     expect(new Set(saga.backstitches.map((s) => s.id))).toEqual(
       new Set(dize.backstitches.map((s) => s.id)),
+    );
+    expect(saga.palette.map((thread) => thread.strands)).toEqual(
+      dize.palette.map((thread) => thread.strands),
     );
     expect(saga.sourceFileHash).not.toBe(dize.sourceFileHash);
     expect(saga.canonicalPatternHash).toBe(dize.canonicalPatternHash);

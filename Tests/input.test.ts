@@ -13,6 +13,22 @@ describe('input safety', () => {
     expect(interpolatedCells({ x: 1, y: 2 }, { x: 8, y: 2 }).map((cell) => cell.x)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8,
     ]));
-  it('filters to the selected thread', () =>
-    expect(selectMarkable([{ threadID: 1 }, { threadID: 2 }], true, 2)).toEqual([{ threadID: 2 }]));
+  it('filters to the selected thread and stitch category', () =>
+    expect(
+      selectMarkable(
+        [
+          { threadID: 1, type: 'fullCross' as const },
+          { threadID: 2, type: 'fullCross' as const },
+          { threadID: 2, type: 'knot' as const },
+        ],
+        true,
+        2,
+        'knot',
+      ),
+    ).toEqual([{ threadID: 2, type: 'knot' }]));
+
+  it('does not mark crosses while a backstitch key row is selected', () =>
+    expect(
+      selectMarkable([{ threadID: 2, type: 'fullCross' as const }], true, 2, 'backstitch'),
+    ).toEqual([]));
 });

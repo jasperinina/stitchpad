@@ -1,4 +1,4 @@
-import type { PatternDocument, RGB, Stitch } from '../model/pattern';
+import type { PatternDocument, RGB, Stitch, StitchKind } from '../model/pattern';
 import type { DisplaySettings } from '../progress/progress';
 import type { RowIndex } from './pattern-index';
 import { visibleCellBounds, type ViewTransform } from './viewport';
@@ -10,6 +10,7 @@ export interface RenderOptions {
   transform: ViewTransform;
   completed: Set<string>;
   selectedThread?: number;
+  selectedKind?: StitchKind;
   settings: DisplaySettings;
 }
 export const canvasBackingSize = (cssWidth: number, cssHeight: number, dpr: number) => ({
@@ -17,6 +18,15 @@ export const canvasBackingSize = (cssWidth: number, cssHeight: number, dpr: numb
   height: Math.round(cssHeight * Math.min(dpr || 1, 2)),
   dpr: Math.min(dpr || 1, 2),
 });
+export const matchesSelection = (
+  threadID: number,
+  kind: StitchKind,
+  selectedThread?: number,
+  selectedKind?: StitchKind,
+) =>
+  selectedThread === undefined ||
+  (selectedThread === threadID && (selectedKind === undefined || selectedKind === kind));
+
 export function renderPattern(canvas: HTMLCanvasElement, options: RenderOptions) {
   const rect = canvas.getBoundingClientRect(),
     backing = canvasBackingSize(rect.width, rect.height, devicePixelRatio),
@@ -85,13 +95,25 @@ export function renderPattern(canvas: HTMLCanvasElement, options: RenderOptions)
       maxY = Math.max(line.startY2, line.endY2) / 2;
     if (maxX < left || minX > right || maxY < top || minY > bottom) continue;
     const thread = pattern.palette.find((p) => p.id === line.threadID);
+    const focused = matchesSelection(
+      line.threadID,
+      'backstitch',
+      options.selectedThread,
+      options.selectedKind,
+    );
     ctx.beginPath();
     ctx.moveTo(line.startX2 / 2, line.startY2 / 2);
     ctx.lineTo(line.endX2 / 2, line.endY2 / 2);
     ctx.lineWidth = Math.max(0.1, 2 / t.scale);
     ctx.strokeStyle = thread ? css(thread.color) : '#202020';
+    ctx.globalAlpha = focused
+      ? 1
+      : settings.mode === 'selectedThreadFocus'
+        ? 1 - settings.dimOthers
+        : 0.45;
     ctx.stroke();
   }
+  ctx.globalAlpha = 1;
   ctx.restore();
 }
 function drawStitch(
@@ -104,7 +126,7 @@ function drawStitch(
   if (!thread) return;
   const done = o.completed.has(stitch.id);
   if (done && o.settings.completedAppearance === 'hide') return;
-  const focused = o.selectedThread === undefined || o.selectedThread === stitch.threadID;
+  const focused = matchesSelection(stitch.threadID, stitch.type, o.selectedThread, o.selectedKind);
   ctx.globalAlpha =
     done && o.settings.completedAppearance === 'dim'
       ? 0.2

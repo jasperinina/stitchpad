@@ -125,6 +125,7 @@ export default function App() {
   const updateProgress = (patch: Partial<StitchProgress>) =>
     setProgress((value) => value && { ...value, ...patch });
   const selected = progress.selectedThreadID;
+  const selectedKind = progress.selectedStitchKind;
   const exportProgress = () => {
     const blob = new Blob(
         [encodeProgress({ ...progress, completedStitchIDs: [...engine.completed] })],
@@ -194,6 +195,7 @@ export default function App() {
             pattern={pattern}
             completed={engine.completed}
             selectedThread={selected}
+            selectedKind={selectedKind}
             settings={progress.displaySettings}
             interaction={interaction}
             markMode={markMode}
@@ -255,8 +257,11 @@ export default function App() {
           <Palette
             pattern={pattern}
             selected={selected}
+            selectedKind={selectedKind}
             engine={engine}
-            onSelect={(id) => updateProgress({ selectedThreadID: id })}
+            onSelect={(id, kind) =>
+              updateProgress({ selectedThreadID: id, selectedStitchKind: kind })
+            }
           />
           <section className="settings-panel">
             <div className="panel-title">
@@ -278,7 +283,7 @@ export default function App() {
                 <option value="symbolsAndColors">Символы и цвета</option>
                 <option value="symbols">Символы</option>
                 <option value="colors">Только цвета</option>
-                <option value="selectedThreadFocus">Фокус на нити</option>
+                <option value="selectedThreadFocus">Фокус на выбранном</option>
               </select>
             </label>
             <label>
@@ -340,7 +345,7 @@ export default function App() {
                   })
                 }
               />
-              Только выбранная нить
+              Только выбранный тип и цвет
             </label>
             <div className="file-actions">
               <button onClick={exportProgress}>Экспорт прогресса</button>
