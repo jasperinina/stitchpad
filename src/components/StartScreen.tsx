@@ -49,7 +49,7 @@ export function StartScreen({
         <div className="privacy-note">
           <span>Только на устройстве</span>
           <span>Работает офлайн</span>
-          <span>Прогресс в IndexedDB</span>
+          <span>Схема и прогресс в IndexedDB</span>
         </div>
       </section>
       <section className="sample-card" aria-hidden="true">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PatternDocument } from './model/pattern';
 import { PatternCanvas } from './components/PatternCanvas';
 import { Palette } from './components/Palette';
@@ -14,7 +14,12 @@ import {
   type MarkMode,
   type StitchProgress,
 } from './progress/progress';
-import { loadProgress, saveProgress } from './persistence/database';
+import {
+  loadLastPattern,
+  loadProgress,
+  saveLastPattern,
+  saveProgress,
+} from './persistence/database';
 
 interface InstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -26,7 +31,7 @@ export default function App() {
     [progress, setProgress] = useState<StitchProgress>(),
     [engine, setEngine] = useState<MarkingEngine>(),
     [revision, setRevision] = useState(0);
-  const [busy, setBusy] = useState(false),
+  const [busy, setBusy] = useState(true),
     [error, setError] = useState<string>(),
     [interaction, setInteraction] = useState<'view' | 'mark'>('view'),
     [markMode, setMarkMode] = useState<MarkMode>('mark'),
@@ -48,7 +53,7 @@ export default function App() {
       window.removeEventListener('stitchpad:update-ready', update);
     };
   }, []);
-  const openFile = async (file: File) => {
+  const openFile = useCallback(async (file: File, remember = true) => {
     setBusy(true);
     setError(undefined);
     try {
@@ -64,12 +69,34 @@ export default function App() {
       setProgress(next);
       setEngine(new MarkingEngine(parsed, next.completedStitchIDs));
       setRevision(0);
+      if (remember)
+        try {
+          await saveLastPattern(file);
+          const persistence = navigator.storage?.persist?.();
+          if (persistence) void persistence.catch(() => undefined);
+        } catch {
+          setError('Схема открыта, но браузер не смог сохранить её для следующего запуска.');
+        }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Не удалось открыть схему');
     } finally {
       setBusy(false);
     }
-  };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    void loadLastPattern()
+      .then((file) => (file && active ? openFile(file, false) : undefined))
+      .catch(() => {
+        if (active) setError('Не удалось восстановить сохранённую схему. Откройте её заново.');
+      })
+      .finally(() => {
+        if (active) setBusy(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [openFile]);
   useEffect(() => {
     if (!progress || !engine || !progress.displaySettings.autosave) return;
     const timer = window.setTimeout(() => {
