@@ -354,6 +354,29 @@ select:focus-visible {
   overflow: auto;
   padding: 8px;
 }
+.legend-group + .legend-group {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(38, 53, 47, 0.12);
+}
+.legend-heading {
+  min-height: 28px;
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #59615a;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.legend-heading strong {
+  font-size: inherit;
+}
+.legend-heading span {
+  font-variant-numeric: tabular-nums;
+}
 .thread {
   width: 100%;
   display: grid;
